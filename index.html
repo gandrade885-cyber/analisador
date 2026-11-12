@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#050706"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Analisador"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-180.png"></head><body><title>Analisador Telemetria</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#050706"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Analisador"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-180.png"></head><body><title>Analisador Telemetria</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800&family=Barlow:wght@400;500;600&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -148,6 +148,44 @@ header.top .brand { text-shadow: 0 1px 10px rgba(0,0,0,.5); }
 .panel.onboard.expanded { position: fixed; inset: 0; z-index: 50; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
 .panel.onboard:fullscreen .video-box, .panel.onboard.expanded .video-box { flex: 1 1 auto; aspect-ratio: auto; min-height: 0; }
 .panel.onboard:fullscreen .mini-map, .panel.onboard.expanded .mini-map { display: block; }
+/* Full screen on a phone lying sideways: the video as big as the height allows with the data over it, and a side
+   column with the track map on top and the speed chart below. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .panel.onboard:fullscreen, .panel.onboard.expanded { display: grid; --side: clamp(200px, 30vw, 300px); grid-template-columns: minmax(0, 1fr) var(--side); grid-template-rows: minmax(0, 1fr) auto; }
+  .panel.onboard:fullscreen .video-box, .panel.onboard.expanded .video-box { grid-column: 1; grid-row: 1; position: static; aspect-ratio: auto; min-height: 0; }
+  .panel.onboard:fullscreen .video-box video, .panel.onboard.expanded .video-box video { object-fit: contain; }
+  .panel.onboard:fullscreen .placeholder, .panel.onboard.expanded .placeholder { inset: 0 var(--side) 46px 0; }
+  .panel.onboard:fullscreen .hud, .panel.onboard.expanded .hud { left: calc(env(safe-area-inset-left, 0px) + 8px); top: calc(env(safe-area-inset-top, 0px) + 8px); right: auto; max-width: calc(100% - var(--side) - 200px); gap: 6px; }
+  .panel.onboard:fullscreen .hud > div, .panel.onboard.expanded .hud > div { padding: 4px 8px; }
+  .panel.onboard:fullscreen .hud .spd-num, .panel.onboard.expanded .hud .spd-num { font-size: 34px; }
+  .panel.onboard:fullscreen .hud .mid, .panel.onboard.expanded .hud .mid { font-size: 16px; }
+  .panel.onboard:fullscreen .hud .lbl, .panel.onboard.expanded .hud .lbl { font-size: 8.5px; letter-spacing: .14em; }
+  .panel.onboard:fullscreen .delta-bar, .panel.onboard.expanded .delta-bar { right: calc(var(--side) + env(safe-area-inset-right, 0px) + 8px); top: calc(env(safe-area-inset-top, 0px) + 8px); width: 170px; height: 40px; }
+  .panel.onboard:fullscreen .delta-bar span, .panel.onboard.expanded .delta-bar span { font-size: 14px; }
+  .panel.onboard:fullscreen .mini-map, .panel.onboard.expanded .mini-map { right: calc(env(safe-area-inset-right, 0px) + 6px); top: calc(env(safe-area-inset-top, 0px) + 6px); bottom: auto; width: calc(var(--side) - 12px); height: calc(100% - 46vh - 62px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); background: #050606; border-color: var(--line); }
+  .panel.onboard:fullscreen .ob-tele, .panel.onboard.expanded .ob-tele { grid-column: 2; grid-row: 1; align-self: end; height: 46vh; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .panel.onboard:fullscreen .transport, .panel.onboard.expanded .transport { grid-column: 1 / -1; grid-row: 2; padding: 4px 8px; flex-wrap: nowrap; }
+  .panel.onboard:fullscreen #vol, .panel.onboard.expanded #vol { display: none; }
+}
+/* Full screen on a phone held upright: data on top, the video at its real 16:9 size, and the map using all the
+   space left below it instead of floating tiny over a black area. */
+@media (orientation: portrait) and (max-width: 900px) {
+  .panel.onboard:fullscreen .video-box, .panel.onboard.expanded .video-box { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; }
+  .panel.onboard:fullscreen .hud, .panel.onboard.expanded .hud { position: static; order: 0; display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: 6px; padding: 0 8px; flex: 0 0 auto; }
+  .panel.onboard:fullscreen .hud > div, .panel.onboard.expanded .hud > div { min-width: 0; padding: 6px 8px; }
+  .panel.onboard:fullscreen .hud .lbl, .panel.onboard.expanded .hud .lbl { font-size: 8.5px; letter-spacing: .12em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .panel.onboard:fullscreen .hud .mid, .panel.onboard.expanded .hud .mid { font-size: 16px; white-space: nowrap; }
+  .panel.onboard:fullscreen .delta-bar, .panel.onboard.expanded .delta-bar { position: relative; right: auto; top: auto; order: 1; width: auto; height: 34px; margin: 0 8px; flex: 0 0 auto; }
+  .panel.onboard:fullscreen .delta-bar span, .panel.onboard.expanded .delta-bar span { font-size: 15px; }
+  .panel.onboard:fullscreen .video-box video, .panel.onboard.expanded .video-box video { order: 2; height: auto; aspect-ratio: 16 / 9; flex: 0 0 auto; object-fit: cover; }
+  .panel.onboard:fullscreen .mini-map, .panel.onboard.expanded .mini-map { position: relative; right: auto; bottom: auto; order: 3; flex: 1 1 0; width: auto; height: auto; min-height: 120px; margin: 0 8px 8px; background: #050606; border-color: var(--line); }
+  .panel.onboard:fullscreen .ob-tele, .panel.onboard.expanded .ob-tele { height: 112px; }
+  .panel.onboard:fullscreen .transport, .panel.onboard.expanded .transport { padding: 6px 8px; gap: 6px 8px; }
+  .panel.onboard:fullscreen #play-btn, .panel.onboard.expanded #play-btn { order: -3; }
+  .panel.onboard:fullscreen #scrub, .panel.onboard.expanded #scrub { order: -2; flex: 1 1 60%; min-width: 0; }
+  .panel.onboard:fullscreen #time, .panel.onboard.expanded #time { order: -1; font-size: 11px; }
+  .panel.onboard:fullscreen #vol, .panel.onboard.expanded #vol { display: none; }
+}
 .ob-tele { display: block; width: 100%; height: 150px; border-top: 1px solid var(--line); background: var(--surface); cursor: pointer; flex: 0 0 auto; }
 .panel.onboard:fullscreen .ob-tele, .panel.onboard.expanded .ob-tele { height: clamp(140px, 18vh, 220px); background: #000; }
 .hud .ped { height: clamp(18px, 3.4cqw, 90px); }
@@ -171,6 +209,14 @@ select.rate { border: 1px solid var(--line-2); background: var(--bg); border-rad
 .map-tools { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 4px; }
 .map-tools button { width: 32px; height: 32px; border-radius: 2px; border: 1px solid var(--line-2); background: rgba(0,0,0,.6); color: var(--fg); font-size: 16px; display: grid; place-items: center; padding: 0; }
 .map-tools button:hover { border-color: var(--brand); color: var(--brand); }
+.map-tools button svg { width: 16px; height: 16px; fill: currentColor; }
+#line-btn[aria-pressed="true"] { border-color: var(--brand); color: var(--on-brand); background: var(--brand); }
+.map-wrap.picking canvas { cursor: crosshair; }
+.line-pick { position: absolute; left: 10px; right: 52px; bottom: 10px; display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--brand); border-radius: 4px; background: rgba(0,0,0,.82); font-size: 13px; z-index: 3; }
+.line-pick b { font-family: var(--f-display); letter-spacing: .04em; color: var(--brand); }
+.line-pick span { color: var(--muted); font-size: 12px; }
+.line-pick div { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.line-pick button { border: 1px solid var(--line-2); background: var(--surface-2); border-radius: 2px; padding: 5px 10px; font-size: 12px; }
 .map-tools button[aria-pressed="true"] { background: var(--brand-dim); color: var(--brand); border-color: var(--brand); }
 .map-tools svg { width: 16px; height: 16px; fill: currentColor; }
 .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 2px; overflow: hidden; }
@@ -313,6 +359,21 @@ table.segs-t tr.total td { border-top: 1px solid var(--line-2); font-weight: 500
 .btn-link:focus-visible { outline: 1px solid var(--brand); outline-offset: 3px; }
 
 /* Export dialog */
+.lib-card { width: min(720px, 100%); max-height: min(86vh, 900px); display: flex; flex-direction: column; }
+.lib-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.lib-dir { flex: 1 1 auto; font-family: var(--f-mono); font-size: 12px; color: var(--fg); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lib-list { overflow-y: auto; padding: 6px 10px 12px; display: grid; gap: 4px; min-height: 160px; }
+.lib-empty { color: var(--muted); padding: 24px 8px; text-align: center; font-size: 13px; }
+.lib-list > .btn { justify-self: center; }
+.lib-day { font-family: var(--f-display); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); padding: 12px 6px 4px; }
+.lib-item { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface-2); color: var(--fg); }
+.lib-item:hover, .lib-item:focus-visible { border-color: var(--brand); }
+.lib-time { font-family: var(--f-mono); font-size: 14px; }
+.lib-main { display: grid; min-width: 0; } .lib-main b { font-family: var(--f-display); font-weight: 600; letter-spacing: .04em; }
+.lib-main span { font-family: var(--f-mono); font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lib-dur { font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.lib-foot { padding: 10px 16px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+.lib-foot .btn-link { color: var(--muted); font-size: 11px !important; }
 .xp { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.72); display: grid; place-items: center; padding: 16px; backdrop-filter: blur(4px); }
 .xp-card { width: min(760px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--surface); border: 1px solid var(--line-2); border-radius: 6px; }
 .xp-body { padding: 18px 20px 20px; display: grid; gap: 16px; }
@@ -413,6 +474,14 @@ table.segs-t tr.total td { border-top: 1px solid var(--line-2); font-weight: 500
     <div class="splash-lights" id="splash-lights"></div>
     <button type="button" class="splash-start" id="splash-start" hidden><span>Start</span><small>Iniciar</small></button>
     <div class="splash-skip">Clique para pular</div>
+  </div>
+</div>
+<div class="xp" id="lib" hidden role="dialog" aria-modal="true" aria-labelledby="lib-h">
+  <div class="xp-card lib-card">
+    <div class="panel-h"><h2 id="lib-h">Vídeos da GoPro</h2><button type="button" class="btn small" id="lib-close">Fechar</button></div>
+    <div class="lib-bar"><span class="lbl-caps">Pasta</span><span class="lib-dir" id="lib-dir">—</span><button type="button" class="btn small" id="lib-refresh">Atualizar</button><button type="button" class="btn small" id="lib-change">Trocar pasta</button></div>
+    <div class="lib-list" id="lib-list"></div>
+    <div class="lib-foot"><button type="button" class="btn-link" id="lib-files">Escolher arquivos avulsos</button></div>
   </div>
 </div>
 <div class="xp" id="xp" hidden role="dialog" aria-modal="true" aria-labelledby="xp-h">
@@ -589,12 +658,14 @@ table.segs-t tr.total td { border-top: 1px solid var(--line-2); font-weight: 500
       <div class="map-wrap" id="map-wrap">
         <canvas id="map" aria-label="Mapa da pista com o traçado das voltas"></canvas>
         <div class="map-tools">
+          <button type="button" id="line-btn" aria-pressed="false" aria-label="Mudar a linha de chegada" title="Mudar a linha de chegada"><svg viewBox="0 0 24 24"><path d="M5 3h2v18H5zM8 4h11l-2.5 4L19 12H8zm2 2v4h2V8h-2zm2-2v2h2V4zm2 4v2h2V8z"/></svg></button>
           <button type="button" id="zoom-in" aria-label="Aproximar">+</button>
           <button type="button" id="zoom-out" aria-label="Afastar">−</button>
           <button type="button" id="zoom-reset" aria-label="Ver a pista inteira" title="Ver a pista inteira"><svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z"/></svg></button>
           <button type="button" id="follow-btn" aria-pressed="false" aria-label="Seguir o carro" title="Seguir o carro"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1a9 9 0 0 0 7.9 7.9V23h2v-2.1a9 9 0 0 0 7.9-7.9H23v-2zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg></button>
         </div>
         <div class="legend" id="map-legend"></div>
+        <div class="line-pick" id="line-pick" hidden><b>Toque na pista onde fica a linha de chegada</b><span>Dica: aproxime com o + para acertar o ponto exato.</span><div><button type="button" id="line-auto">Linha automática</button><button type="button" id="line-cancel">Cancelar</button></div></div>
       </div>
       <div class="map-foot">
         <span class="hint">Linha colorida = volta de referência; os rótulos C1, C2… mostram a velocidade mínima dela em cada curva. Linha fina escura tracejada = volta comparada; cinza = demais voltas. Traço cheio cruzando a pista = freada da ref.; traço vazado = freada da comp. Role ou pince para dar zoom.</span>
@@ -878,7 +949,31 @@ const GoproParser = (() => {
     return { points, accl, gpsKind: kind, clock, duration: video ? video.duration : meta.duration, metaDuration: meta.duration };
   }
 
-  return { parseFile, parsePayload };
+  // Quick look: is this a GoPro video with telemetry, how long, when, and where (one GPS fix from the middle).
+  // Reads only the file index and a couple of small telemetry packets, so it is fast even for 4 GB files.
+  async function probe(blob) {
+    try {
+      const moov = await findMoov(blob);
+      const traks = boxes(moov, 0, moov.byteLength).filter(b => b.type === 'trak');
+      let meta = null, video = null;
+      for (const t of traks) { const info = readTrack(moov, t); if (!info) continue; if (info.format === 'gpmd') meta = info; else if (info.handler === 'vide' && !video) video = info; }
+      if (!meta) return { ok: false };
+      let when = null;
+      const mvhd = boxes(moov, 0, moov.byteLength).find(b => b.type === 'mvhd');
+      if (mvhd) { const v = moov.getUint8(mvhd.s), secs = v === 1 ? Number(moov.getBigUint64(mvhd.s + 4)) : moov.getUint32(mvhd.s + 4); if (secs > 3.2e9) when = new Date((secs - 2082844800) * 1000); }
+      let gps = null;
+      const tbl = sampleTable(moov, meta.stbl, meta.timescale);
+      for (const f of [0.5, 0.3, 0.7, 0.1, 0.9]) {
+        const k = Math.min(tbl.n - 1, Math.floor(tbl.n * f)); if (k < 0) break;
+        const res = parsePayload(await slice(blob, tbl.offsets[k], tbl.offsets[k] + tbl.sizes[k]));
+        const g = res.gps.find(q => (q.fix == null || q.fix >= 2) && Math.abs(q.lat) > 0.01);
+        if (g) { gps = { lat: g.lat, lon: g.lon }; if (g.gt > 0) when = new Date(Date.UTC(2000, 0, 1) + (g.gt - tbl.times[k]) * 1000); break; }
+      }
+      return { ok: true, duration: video ? video.duration : meta.duration, gps, when: when ? when.getTime() : null };
+    } catch (e) { return { ok: false }; }
+  }
+
+  return { parseFile, parsePayload, probe };
 })();
 if (typeof module !== 'undefined') module.exports = GoproParser;
 
@@ -1488,6 +1583,7 @@ function banner(html, kind) { const b = $('banner'); b.className = 'banner' + (k
 // ---------- session ----------
 function setSession(points, files, geoLine, isSample) {
   const s = A.prepare(points);
+  if (typeof setPicking === 'function' && state.picking) setPicking(false);
   state.s = s; state.files = files; state.isSample = isSample; $('delta-bar').hidden = !!isSample; $('export-btn').hidden = !!isSample;
   state.duration = files.length ? files.reduce((a, f) => a + f.duration, 0) : s.t[s.n - 1];
   let line = null;
@@ -1846,6 +1942,7 @@ function handleMapClick(clientX, clientY) {
   if (!state.s || !mapView) return;
   const r = mapCanvas.getBoundingClientRect(), X = clientX - r.left, Y = clientY - r.top;
   const wx = mapView.ix(X), wy = mapView.iy(Y);
+  if (state.picking) { pickLineAt(wx, wy); return; }
   const ref = state.laps[state.refIdx];
   if (ref) {
     let bi = 0, bd = Infinity;
@@ -1903,7 +2000,7 @@ function renderMapLegend() {
     : '<span><b style="background:var(--throttle)"></b>acelerando</span><span><b style="background:var(--coast)"></b>aliviando</span><span><b style="background:var(--brake)"></b>freando</span>';
 }
 function setLine(line) {
-  state.line = line;
+  state.line = line; if (!state.isSample) state.lineSource = 'saved';
   // Saved lines are kept in geographic directions, independent of how the map is turned.
   const c = state.s.rc ?? 1, k = state.s.rs ?? 0;
   const geo = { lat: line.lat, lon: line.lon, hx: line.hx * c + line.hy * k, hy: -line.hx * k + line.hy * c };
@@ -1911,6 +2008,35 @@ function setLine(line) {
   recompute(true);
   toast(state.laps.length ? `Linha de chegada salva para ${state.track ? state.track.name : 'esta pista'} · ${state.laps.length} voltas` : 'Linha definida, mas nenhuma volta completa cruza esse ponto');
 }
+
+// Change the finish line by tapping the track: the line goes across the track at the nearest point the car
+// actually drove at speed (the reference lap when there is one), pointing along the direction of travel.
+function setPicking(on) {
+  state.picking = on && !!state.s && !state.isSample;
+  $('line-btn').setAttribute('aria-pressed', state.picking); $('line-pick').hidden = !state.picking; $('map-wrap').classList.toggle('picking', state.picking);
+}
+function pickLineAt(wx, wy) {
+  const s = state.s, ref = state.laps[state.refIdx];
+  let i;
+  if (ref) { let bi = 0, bd = Infinity; for (let k = 0; k < ref.x.length; k++) { const d = (ref.x[k] - wx) ** 2 + (ref.y[k] - wy) ** 2; if (d < bd) { bd = d; bi = k; } } i = A.indexAtTime(s, ref.start + ref.t[bi]); }
+  else { let bd = Infinity; i = 0; for (let k = 0; k < s.n; k++) { if (s.v[k] < 8) continue; const d = (s.x[k] - wx) ** 2 + (s.y[k] - wy) ** 2; if (d < bd) { bd = d; i = k; } } }
+  setPicking(false);
+  setLine(A.lineAtIndex(s, i));
+}
+$('line-btn').addEventListener('click', () => {
+  if (!state.s || state.isSample) { toast('Abra um vídeo seu para mudar a linha de chegada'); return; }
+  setPicking(!state.picking);
+});
+$('line-cancel').addEventListener('click', () => setPicking(false));
+$('line-auto').addEventListener('click', () => {
+  // forget the line saved for this track and go back to the official one (if known) or the automatic one
+  const center = { lat: state.s.lat0, lon: state.s.lon0 };
+  store.set(store.get().filter(g => geoDist(g, center) > 3000));
+  setPicking(false);
+  state.line = state.track && state.track.line ? A.lineFromGeo(state.s, state.track.line) : A.defaultLine(state.s);
+  state.lineSource = state.track && state.track.line ? 'official' : 'auto';
+  recompute(true); toast('Linha de chegada voltou para a ' + (state.lineSource === 'official' ? 'oficial' : 'automática'));
+});
 
 // ---------- corners ----------
 function computeCorners() {
@@ -2142,8 +2268,9 @@ video.addEventListener('error', () => {
   if (!state.files.length || !video.getAttribute('src')) return;
   player.mode = 'clock'; player.vt = 0;
   const ph = $('placeholder'); ph.hidden = false;
-  ph.querySelector('strong').textContent = 'Vídeo não reproduzido';
-  ph.querySelector('p').textContent = 'Seu navegador não conseguiu tocar este vídeo (a HERO13 normalmente grava em HEVC/H.265). Os dados foram lidos normalmente e o carro se move no mapa com o play. No Windows, instalar as Extensões de Vídeo HEVC da Microsoft Store costuma resolver; Safari no Mac/iPhone toca direto.';
+  const phS = ph.querySelector('strong'), phP = ph.querySelector('p'); if (!phS || !phP) return;
+  phS.textContent = 'Vídeo não reproduzido';
+  phP.textContent = 'Seu navegador não conseguiu tocar este vídeo (a HERO13 normalmente grava em HEVC/H.265). Os dados foram lidos normalmente e o carro se move no mapa com o play. No Windows, instalar as Extensões de Vídeo HEVC da Microsoft Store costuma resolver; Safari no Mac/iPhone toca direto.';
 });
 function setPlayIcon() {
   $('play-ico').innerHTML = player.playing ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>' : '<path d="M7 4.5v15l12-7.5z"/>';
@@ -2177,6 +2304,19 @@ $('fs-btn').addEventListener('click', () => {
   } catch (e) { setExpanded(true); }
 });
 document.addEventListener('fullscreenchange', afterResize);
+(() => {
+  if (!window.matchMedia) return;
+  const touch = matchMedia('(pointer: coarse)').matches, side = matchMedia('(orientation: landscape) and (max-height: 520px)');
+  let auto = false;
+  const onTurn = () => {
+    if (!touch) return;
+    if (side.matches && !isBig() && state.files.length && !cmpUI.open) { setExpanded(true); auto = true; }
+    else if (!side.matches && auto) { if (obPanel.classList.contains('expanded')) setExpanded(false); auto = false; }
+    afterResize();
+  };
+  side.addEventListener ? side.addEventListener('change', onTurn) : side.addListener(onTurn);
+  $('fs-btn').addEventListener('click', () => { auto = false; });
+})();
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && obPanel.classList.contains('expanded')) setExpanded(false); });
 
 function drawMini() {
@@ -3138,7 +3278,7 @@ function drawObTele(gt) {
   const F = { mono: col('--f-mono'), disp: col('--f-display') };
   g.font = `600 10px ${F.disp}`; g.fillStyle = col('--muted'); g.textAlign = 'left'; g.textBaseline = 'middle';
   if ('letterSpacing' in g) g.letterSpacing = '2px';
-  g.fillText('VELOCIDADE · TRECHO ATUAL', 14, 14);
+  if (w >= 640) g.fillText('VELOCIDADE · TRECHO ATUAL', 14, 14); // on a phone the legend needs the whole line
   if ('letterSpacing' in g) g.letterSpacing = '0px';
   if (!state.s || state.isSample) { g.textAlign = 'center'; g.font = `500 12px ${F.disp}`; g.fillText('Abra um vídeo da GoPro para ver os dados.', w / 2, h / 2); return; }
   const li = state.laps.findIndex(l => gt >= l.start && gt < l.end);
@@ -3148,7 +3288,7 @@ function drawObTele(gt) {
   const leg = [['acelerando', col('--throttle')], ['aliviando', col('--coast')], ['freando', col('--brake')]];
   if (best && li !== state.bestIdx) leg.push(['melhor volta', col('--ref')]);
   g.font = `500 11px ${F.disp}`; let lx = w - 14; g.textAlign = 'right';
-  for (let k = leg.length - 1; k >= 0; k--) { const [n, c] = leg[k]; g.fillStyle = col('--muted'); g.fillText(n, lx, 14); lx -= g.measureText(n).width + 6; g.fillStyle = c; g.fillRect(lx - 12, 13, 12, 3); lx -= 26; }
+  if (w >= 420) for (let k = leg.length - 1; k >= 0; k--) { const [n, c] = leg[k]; g.fillStyle = col('--muted'); g.fillText(n, lx, 14); lx -= g.measureText(n).width + 6; g.fillStyle = c; g.fillRect(lx - 12, 13, 12, 3); lx -= 26; }
   const padL = 46, padR = 14, top = 30, bot = h - 10, half = 350 / L;
   let f0 = fc - half, f1 = fc + half; if (f0 < 0) { f1 -= f0; f0 = 0; } if (f1 > 1) { f0 -= f1 - 1; f1 = 1; } f0 = Math.max(0, f0);
   obWin = { f0, f1, padL, padR, w, lap };
@@ -3272,9 +3412,19 @@ function goproKey(name) {
   const m = /^G([HXLP])(\d\d)(\d{4})/i.exec(name);
   return m ? `${m[3]}-${m[2]}` : name;
 }
-async function loadFiles(list) {
-  const files = [...list].filter(f => /\.mp4$/i.test(f.name) || f.type === 'video/mp4');
+async function loadFiles(list, checked) {
+  let files = [...list].filter(f => /\.(mp4|mov)$/i.test(f.name) || /video\//.test(f.type));
   if (!files.length) { banner('Escolha arquivos .MP4 gravados pela GoPro.', 'error'); return; }
+  if (!checked) {
+    // keep only the videos that carry GoPro telemetry; anything else picked by mistake is left out
+    banner(`<span class="tag">Lendo</span><span>Procurando os vídeos da GoPro com GPS…</span>`);
+    const ok = [];
+    for (const f of files) if ((await GoproParser.probe(f)).ok) ok.push(f);
+    const skipped = files.length - ok.length;
+    if (!ok.length) { banner(`<span class="tag">Erro</span><span>${files.length > 1 ? 'Nenhum desses vídeos tem' : 'Este vídeo não tem'} os dados de GPS da GoPro. Escolha os arquivos originais da câmera.</span>`, 'error'); return; }
+    if (skipped) toast(`${skipped} ${skipped > 1 ? 'vídeos sem GPS da GoPro foram ignorados' : 'vídeo sem GPS da GoPro foi ignorado'}`);
+    files = ok;
+  }
   files.sort((a, b) => goproKey(a.name).localeCompare(goproKey(b.name)));
   player.pause();
   const all = [], meta = [];
@@ -3329,7 +3479,88 @@ function officialText() {
     + (oi.estimated.length ? ` Voltas ${oi.estimated.join(', ')} sem tempo oficial: GPS corrigido pelo padrão da sessão (${A.fmtDelta(oi.bias, 3)} s), marcadas como EST.` : '')
     + (oi.missing.length ? ` Sem tempo oficial (GPS): ${oi.missing.map(n => 'volta ' + n).join(', ')}.` : '');
 }
-$('open-btn').addEventListener('click', () => $('file-input').click());
+const canFolder = 'showDirectoryPicker' in window && window.top === window;
+const lib = { dir: null, items: [] };
+function libKv() { return window.__kv ? window.__kv.openDb() : Promise.reject(); }
+async function libGet(k) { try { return await window.__kv.get(await libKv(), k); } catch (e) { return null; } }
+async function libPut(k, v) { try { await window.__kv.put(await libKv(), k, v); } catch (e) {} }
+function libOpen() { $('lib').hidden = false; }
+function libClose() { $('lib').hidden = true; }
+async function libChooseDir() {
+  try { lib.dir = await window.showDirectoryPicker({ id: 'gopro', mode: 'read' }); } catch (e) { return false; }
+  await libPut('gopro-dir', lib.dir); return true;
+}
+async function libScan() {
+  const list = $('lib-list'); list.innerHTML = '<div class="lib-empty">Procurando os vídeos da GoPro com GPS…</div>';
+  $('lib-dir').textContent = lib.dir.name;
+  const found = [];
+  async function walk(d, depth) {
+    for await (const [name, h] of d.entries()) {
+      if (h.kind === 'directory' && depth < 4 && !name.startsWith('.')) await walk(h, depth + 1);
+      else if (h.kind === 'file' && /\.mp4$/i.test(name) && !name.startsWith('.')) found.push({ name, h, dir: d.name });
+    }
+  }
+  await walk(lib.dir, 0);
+  const cache = (await libGet('probe-cache')) || {};
+  const ok = []; let n = 0;
+  for (const it of found) {
+    const f = await it.h.getFile(), key = `${it.name}|${f.size}|${f.lastModified}`;
+    let pr = cache[key];
+    if (!pr) { pr = await GoproParser.probe(f); cache[key] = pr; }
+    n++; if (n % 5 === 0) list.innerHTML = `<div class="lib-empty">Procurando os vídeos da GoPro com GPS… ${n} de ${found.length}</div>`;
+    if (pr.ok) ok.push({ ...it, file: f, pr });
+  }
+  await libPut('probe-cache', cache);
+  // chapters of one recording (GX01 0123, GX02 0123…) become one item
+  const groups = new Map();
+  for (const it of ok) { const m = /^G([HXLP])(\d\d)(\d{4})/i.exec(it.name), k = it.dir + '/' + (m ? m[3] : it.name); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); }
+  lib.items = [...groups.values()].map(parts => {
+    parts.sort((a, b) => goproKey(a.name).localeCompare(goproKey(b.name)));
+    const first = parts[0], when = first.pr.when || first.file.lastModified, g = parts.find(p => p.pr.gps);
+    return { parts, when, dur: parts.reduce((a, p) => a + (p.pr.duration || 0), 0), track: g ? identifyTrack(g.pr.gps) : null };
+  }).sort((a, b) => b.when - a.when);
+  libRender();
+}
+function libRender() {
+  const list = $('lib-list');
+  if (!lib.items.length) { list.innerHTML = '<div class="lib-empty">Nenhum vídeo da GoPro com GPS nesta pasta. Escolha a pasta onde ficam os arquivos da câmera.</div>'; return; }
+  const day = d => new Date(d).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+  const hm = d => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  let html = '', last = '';
+  lib.items.forEach((it, i) => {
+    const d = day(it.when); if (d !== last) { html += `<div class="lib-day">${d}</div>`; last = d; }
+    const tr = it.track && !it.track.unknown ? it.track.name : 'Pista não identificada';
+    html += `<button type="button" class="lib-item" data-i="${i}"><span class="lib-time">${hm(it.when)}</span><span class="lib-main"><b>${tr}</b><span>${it.parts.map(p => p.name).join(' + ')}</span></span><span class="lib-dur">${fmtClock(it.dur)}</span></button>`;
+  });
+  list.innerHTML = html;
+}
+async function libStart() {
+  libOpen();
+  if (!lib.dir) {
+    const saved = await libGet('gopro-dir');
+    if (saved) {
+      lib.dir = saved;
+      let perm = 'prompt'; try { perm = await saved.queryPermission({ mode: 'read' }); } catch (e) {}
+      if (perm !== 'granted') { try { perm = await saved.requestPermission({ mode: 'read' }); } catch (e) {} }
+      if (perm !== 'granted') lib.dir = null;
+    }
+  }
+  if (!lib.dir) { $('lib-dir').textContent = '—'; $('lib-list').innerHTML = '<div class="lib-empty">Escolha uma vez a pasta onde você guarda os vídeos da GoPro (pode ser o cartão da câmera). O app mostra só as gravações com GPS, separadas por dia e pista.</div><button type="button" class="btn primary" id="lib-first">Escolher a pasta da GoPro</button>'; return; }
+  await libScan();
+}
+if (canFolder) {
+  $('open-btn').addEventListener('click', () => libStart());
+  $('lib-list').addEventListener('click', async e => {
+    if (e.target.id === 'lib-first') { if (await libChooseDir()) libScan(); return; }
+    const b = e.target.closest('.lib-item'); if (!b) return;
+    const it = lib.items[+b.dataset.i]; libClose(); loadFiles(it.parts.map(p => p.file), true);
+  });
+  $('lib-change').addEventListener('click', async () => { if (await libChooseDir()) libScan(); });
+  $('lib-refresh').addEventListener('click', () => { if (lib.dir) libScan(); else libStart(); });
+  $('lib-files').addEventListener('click', () => { libClose(); $('file-input').click(); });
+  $('lib-close').addEventListener('click', libClose);
+  $('lib').addEventListener('click', e => { if (e.target.id === 'lib') libClose(); });
+} else $('open-btn').addEventListener('click', () => $('file-input').click());
 $('file-input').addEventListener('change', e => { if (e.target.files.length) loadFiles(e.target.files); e.target.value = ''; });
 let dragDepth = 0;
 window.addEventListener('dragenter', e => { if (e.dataTransfer?.types?.includes('Files')) { dragDepth++; $('drop').hidden = false; } });
