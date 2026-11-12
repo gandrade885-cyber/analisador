@@ -481,7 +481,7 @@ table.segs-t tr.total td { border-top: 1px solid var(--line-2); font-weight: 500
     <div class="panel-h"><h2 id="lib-h">Vídeos da GoPro</h2><button type="button" class="btn small" id="lib-close">Fechar</button></div>
     <div class="lib-bar"><span class="lbl-caps">Pasta</span><span class="lib-dir" id="lib-dir">—</span><button type="button" class="btn small" id="lib-refresh">Atualizar</button><button type="button" class="btn small" id="lib-change">Trocar pasta</button></div>
     <div class="lib-list" id="lib-list"></div>
-    <div class="lib-foot"><button type="button" class="btn-link" id="lib-files">Escolher arquivos avulsos</button></div>
+    <div class="lib-foot"><button type="button" class="btn small" id="lib-files">Escolher arquivos avulsos</button></div>
   </div>
 </div>
 <div class="xp" id="xp" hidden role="dialog" aria-modal="true" aria-labelledby="xp-h">
@@ -3504,23 +3504,27 @@ async function libScan() {
   const cache = (await libGet('probe-cache')) || {};
   const ok = []; let n = 0;
   for (const it of found) {
-    const f = await it.h.getFile(), key = `${it.name}|${f.size}|${f.lastModified}`;
+    let f; try { f = await it.h.getFile(); } catch (e) { n++; continue; }
+    const key = `${it.name}|${f.size}|${f.lastModified}`;
     let pr = cache[key];
     if (!pr) { pr = await GoproParser.probe(f); cache[key] = pr; }
-    n++; if (n % 5 === 0) list.innerHTML = `<div class="lib-empty">Procurando os vídeos da GoPro com GPS… ${n} de ${found.length}</div>`;
+    n++; list.innerHTML = `<div class="lib-empty">Procurando os vídeos da GoPro com GPS… ${n} de ${found.length}<br><small>na primeira vez demora um pouco; depois fica guardado</small></div>`;
     if (pr.ok) ok.push({ ...it, file: f, pr });
   }
   await libPut('probe-cache', cache);
   // chapters of one recording (GX01 0123, GX02 0123…) become one item
   const groups = new Map();
-  for (const it of ok) { const m = /^G([HXLP])(\d\d)(\d{4})/i.exec(it.name), k = it.dir + '/' + (m ? m[3] : it.name); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); }
+  for (const it of ok) { const m = /^G([HXLP])(\d\d)(\d{4})/i.exec(it.name), k = it.dir + '/' + (m ? m[3] : partBase(it.name)); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); }
   lib.items = [...groups.values()].map(parts => {
-    parts.sort((a, b) => goproKey(a.name).localeCompare(goproKey(b.name)));
+    parts.sort((a, b) => partNo(a.name) - partNo(b.name) || goproKey(a.name).localeCompare(goproKey(b.name)));
     const first = parts[0], when = first.pr.when || first.file.lastModified, g = parts.find(p => p.pr.gps);
     return { parts, when, dur: parts.reduce((a, p) => a + (p.pr.duration || 0), 0), track: g ? identifyTrack(g.pr.gps) : null };
   }).sort((a, b) => b.when - a.when);
   libRender();
 }
+// files renamed by hand, like "Corrida 2 Part 1.MP4" + "Corrida 2 Part 2.MP4", are one recording too
+function partBase(n) { return n.replace(/\.mp4$/i, '').replace(/\s*(part|parte|pt)\.?\s*\d+\s*$/i, '').trim().toLowerCase(); }
+function partNo(n) { const m = /(part|parte|pt)\.?\s*(\d+)\s*(\.mp4)?$/i.exec(n.trim()); return m ? +m[2] : 0; }
 function libRender() {
   const list = $('lib-list');
   if (!lib.items.length) { list.innerHTML = '<div class="lib-empty">Nenhum vídeo da GoPro com GPS nesta pasta. Escolha a pasta onde ficam os arquivos da câmera.</div>'; return; }
@@ -3530,7 +3534,8 @@ function libRender() {
   lib.items.forEach((it, i) => {
     const d = day(it.when); if (d !== last) { html += `<div class="lib-day">${d}</div>`; last = d; }
     const tr = it.track && !it.track.unknown ? it.track.name : 'Pista não identificada';
-    html += `<button type="button" class="lib-item" data-i="${i}"><span class="lib-time">${hm(it.when)}</span><span class="lib-main"><b>${tr}</b><span>${it.parts.map(p => p.name).join(' + ')}</span></span><span class="lib-dur">${fmtClock(it.dur)}</span></button>`;
+    const folder = it.parts[0].dir && it.parts[0].dir !== lib.dir.name ? it.parts[0].dir + ' · ' : '';
+    html += `<button type="button" class="lib-item" data-i="${i}"><span class="lib-time">${hm(it.when)}</span><span class="lib-main"><b>${tr}</b><span>${folder}${it.parts.map(p => p.name.replace(/\.mp4$/i, '')).join(' + ')}</span></span><span class="lib-dur">${fmtClock(it.dur)}</span></button>`;
   });
   list.innerHTML = html;
 }
